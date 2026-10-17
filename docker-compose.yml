@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: egybounty
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      POSTGRES_DB: egybounty
+    volumes: [dbdata:/var/lib/postgresql/data]
+  app:
+    build: .
+    restart: always
+    depends_on: [db]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://egybounty:${DB_PASSWORD}@db:5432/egybounty
+      UPLOAD_DIR: /data/uploads
+      PRIVATE_DIR: /data/private
+    volumes: [appdata:/data]
+    ports: ["127.0.0.1:3000:3000"]   # put nginx/Caddy with HTTPS in front
+volumes: { dbdata: {}, appdata: {} }
